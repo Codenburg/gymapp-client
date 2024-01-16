@@ -2,25 +2,28 @@ import { View, Text, TextInput, Button } from "react-native";
 import React, { useEffect, useState } from "react";
 import { API_URL, useAuth } from "../context/AuthContext";
 import { StyleSheet } from "react-native";
-import axios from "axios";
 
 const Login = () => {
   const [dni, setDni] = useState("");
   const [password, setPassword] = useState("");
   const { onLogin, onRegister } = useAuth();
 
-//   useEffect(() => {
-//     const testCall = async () => {
-//       const result = await axios.post(`${API_URL}accounts/register/`);
-//       console.log(result)
-//     };
-//     testCall();
-//   }, []);
-  
+  //   useEffect(() => {
+  //     const testCall = async () => {
+  //       const result = await axios.post(`${API_URL}accounts/register/`);
+  //       console.log(result)
+  //     };
+  //     testCall();
+  //   }, []);
+
   const login = async () => {
-    const result = await onLogin!(dni, password);
-    if (result && result.error) {
-      alert(result.msg);
+    try {
+      const result = await onLogin!(dni, password);
+      if (result && result.error) {
+        return alert(result.msg);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 

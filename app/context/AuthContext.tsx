@@ -2,22 +2,27 @@ import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
+//Interfaz de autententicacion
 interface AuthProps {
   authState?: { token: string | null; authenticated: boolean | null };
   onRegister?: (dni: string, password: string) => Promise<any>;
   onLogin?: (dni: string, password: string) => Promise<any>;
   onLogout?: () => Promise<any>;
 }
-
+//Clave para almacenar y recuperar el access_token en SecureStore
 const TOKEN_KEY = "access";
 export const API_URL = "http://localhost:8000/";
+
+//Contexto con la interfaz definida
 const AuthContext = createContext<AuthProps>({});
 
+//Hook que utiliza useContext para acceder al contexto de autenticación
 export const useAuth = () => {
   return useContext(AuthContext);
 };
+//Componente proveedor de contexto que envuelve la aplicación y proporciona funciones de autenticación y estado
 export const AuthProvider = ({ children }: any) => {
-  //state
+  //Estado para almacenar el token y el estado de autenticación
   const [authState, setAuthState] = useState<{
     token: string | null;
     authenticated: boolean | null;
@@ -25,7 +30,7 @@ export const AuthProvider = ({ children }: any) => {
     token: null,
     authenticated: null,
   });
-
+  // Efecto para cargar el token almacenado al montar el componente
   useEffect(() => {
     const loadToken = async () => {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
@@ -37,6 +42,7 @@ export const AuthProvider = ({ children }: any) => {
     loadToken();
   }, []);
 
+  // Función para realizar el registro de usuario
   const register = async (dni: string, password: string) => {
     try {
       return await axios.post(`${API_URL}accounts/register`, {
@@ -47,14 +53,14 @@ export const AuthProvider = ({ children }: any) => {
       return { error: true, msg: (e as any).response.data.msg };
     }
   };
-
+  // Función para realizar el inicio de sesión
   const login = async (dni: string, password: string) => {
     try {
       const response = await axios.post(`${API_URL}accounts/login/`, {
         dni,
         password,
       });
-      //console.log('response:',response)
+      // Establecer el estado de autenticación y configurar el encabezado de autorización de Axios
       setAuthState({
         token: response.data.access,
         authenticated: true,
@@ -63,29 +69,33 @@ export const AuthProvider = ({ children }: any) => {
       axios.defaults.headers.common[
         "Authorization"
       ] = `Bearer${response.data.access}`;
+      // Almacenar el token de acceso de forma segura
       await SecureStore.setItemAsync(TOKEN_KEY, response.data.access);
       return response;
     } catch (e) {
       return { error: true, msg: (e as any).response.data.msg };
     }
   };
+  // Función para cerrar sesión
   const logout = async () => {
-    //Delete token
+    // Eliminar el token almacenado de forma segura
     await SecureStore.deleteItemAsync(TOKEN_KEY);
-    //Update HTTP Headers
+    // Actualizar los encabezados HTTP
     axios.defaults.headers.common["Authorization"] = "";
-    //Reset auth state
+    // Restablecer el estado de autenticación
     setAuthState({
       token: null,
       authenticated: false,
     });
   };
 
+  // Valor del contexto con funciones de autenticación y estado actual
   const value = {
     onRegister: register,
     onLogin: login,
     onLogout: logout,
     authState,
   };
+  // Proporcionar el valor del contexto a través del proveedor de contexto
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
