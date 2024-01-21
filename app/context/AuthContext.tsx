@@ -10,7 +10,7 @@ interface AuthProps {
   onLogout?: () => Promise<any>;
 }
 //Clave para almacenar y recuperar el access_token en SecureStore
-const TOKEN_KEY = "access";
+export const TOKEN_KEY = "SPwNgifVA2i3Ju3QHS7cwQxJgKhUSXsewD7VF4XgnRzrwFkKYpnYqQU2QNYQXitz4y7DjKCZESvV";
 export const API_URL = "http://localhost:8000/";
 
 //Contexto con la interfaz definida
@@ -34,7 +34,6 @@ export const AuthProvider = ({ children }: any) => {
   useEffect(() => {
     const loadToken = async () => {
       const token = await SecureStore.getItemAsync(TOKEN_KEY);
-      console.log("stored:", token);
       if (token) {
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       }
