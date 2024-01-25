@@ -1,68 +1,53 @@
 import { View, Text, TextInput, Button } from "react-native";
-import React, { useEffect, useState } from "react";
-import { API_URL, useAuth } from "../context/AuthContext";
-import { StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import tw from "twrnc";
 
 const Login = () => {
   const [dni, setDni] = useState("");
   const [password, setPassword] = useState("");
-  const { onLogin, onRegister } = useAuth();
-
-  //   useEffect(() => {
-  //     const testCall = async () => {
-  //       const result = await axios.post(`${API_URL}accounts/register/`);
-  //       console.log(result)
-  //     };
-  //     testCall();
-  //   }, []);
+  const { onLogin } = useAuth();
 
   const login = async () => {
     try {
       const result = await onLogin!(dni, password);
       if (result && result.error) {
-        return alert(result.msg);
+        return alert("Datos incorrectos");
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  const register = async () => {
-    const result = await onRegister!(dni, password);
-    if (result && result.error) {
-      alert(result.msg);
-    } else {
-      login();
-    }
-  };
-
   return (
-    <View style={styles.container}>
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="dni"
-          onChangeText={(number: string) => setDni(number)}
-          value={dni}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Contrasena"
-          onChangeText={(pass: string) => setPassword(pass)}
-          secureTextEntry={false}
-        />
-        <Button onPress={login} title="Sign in" />
-        <Button onPress={register} title="Create Account" />
+    <View
+      style={tw`flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8`}
+    >
+      <View style={tw`sm:mx-auto sm:w-full sm:max-w-sm`}>
+        <Text
+          style={tw`mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900`}
+        >
+          Iniciar Sesion
+        </Text>
+        <View style={tw`mt-10 sm:mx-auto sm:w-full sm:max-w-sm`}>
+          <TextInput
+            style={tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`}
+            placeholder="DNI"
+            onChangeText={(number: string) => setDni(number)}
+            value={dni}
+            keyboardType="numeric"
+          />
+          <TextInput
+            style={tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`}
+            placeholder="Contraseña"
+            onChangeText={(pass: string) => setPassword(pass)}
+            secureTextEntry={true}
+          />
+          <Button onPress={login} title="Ingresar" />
+        </View>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {},
-  form: {},
-  input: {},
-});
 
 export default Login;

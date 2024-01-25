@@ -15,14 +15,21 @@ export const Layout = () => {
       <Stack.Navigator>
         {authState?.authenticated ? (
           <Stack.Screen
-            name="Gym app"
+            name="Gymapp"
             component={ScreenRedirection}
             options={{
+              headerShown: false,
               headerRight: () => <Button onPress={onLogout} title="Sign Out" />,
             }}
           ></Stack.Screen>
         ) : (
-          <Stack.Screen name="Login" component={Login}></Stack.Screen>
+          <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{
+              headerShown: false,
+            }}
+          ></Stack.Screen>
         )}
       </Stack.Navigator>
     </NavigationContainer>

@@ -5,30 +5,43 @@ import JWT from "expo-jwt";
 import { TOKEN_KEY, useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { JWTBody } from "expo-jwt/dist/types/jwt";
+import { Button } from "react-native";
 const Stack = createNativeStackNavigator();
 
 export const ScreenRedirection = () => {
-  const { authState } = useAuth();
+  const { authState, onLogout } = useAuth();
   const token = authState?.token;
-  const [decodedToken,setDecodedToken] = useState<JWTBody>()
+  const [decodedToken, setDecodedToken] = useState<JWTBody>();
 
   useEffect(() => {
     const decodeToken = () => {
       if (token) {
-        const decodedToken =JWT.decode(token, TOKEN_KEY, { timeSkew: 30 })
-        setDecodedToken(decodedToken)
+        const decodedToken = JWT.decode(token, TOKEN_KEY, { timeSkew: 30 });
+        setDecodedToken(decodedToken);
       }
     };
     decodeToken();
   }, [token]);
 
-  const isAdmin = decodedToken?.is_staff
+  const isAdmin = decodedToken?.is_staff;
   return (
     <Stack.Navigator>
       {isAdmin ? (
-        <Stack.Screen name="Admin" component={AdminScreen}></Stack.Screen>
+        <Stack.Screen
+          name="Admin"
+          component={AdminScreen}
+          options={{
+            headerRight: () => <Button onPress={onLogout} title="Sign Out" />,
+          }}
+        ></Stack.Screen>
       ) : (
-        <Stack.Screen name="User" component={UserScreen}></Stack.Screen>
+        <Stack.Screen
+          name="User"
+          component={UserScreen}
+          options={{
+            headerRight: () => <Button onPress={onLogout} title="Sign Out" />,
+          }}
+        ></Stack.Screen>
       )}
     </Stack.Navigator>
   );
