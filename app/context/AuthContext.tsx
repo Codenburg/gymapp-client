@@ -1,16 +1,22 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
+import JWT from "expo-jwt";
 
 //Interfaz de autententicacion
 interface AuthProps {
-  authState?: { token: string | null; authenticated: boolean | null };
+  authState?: {
+    accessToken: string | null;
+    refreshToken: string | null;
+    authenticated: boolean | null;
+  };
   onRegister?: (dni: string, password: string) => Promise<any>;
   onLogin?: (dni: string, password: string) => Promise<any>;
   onLogout?: () => Promise<any>;
 }
 //Clave para almacenar y recuperar el access_token en SecureStore
-export const TOKEN_KEY = "SPwNgifVA2i3Ju3QHS7cwQxJgKhUSXsewD7VF4XgnRzrwFkKYpnYqQU2QNYQXitz4y7DjKCZESvV";
+export const TOKEN_KEY =
+  "SPwNgifVA2i3Ju3QHS7cwQxJgKhUSXsewD7VF4XgnRzrwFkKYpnYqQU2QNYQXitz4y7DjKCZESvV";
 export const API_URL = "http://localhost:8000/";
 
 //Contexto con la interfaz definida
@@ -22,12 +28,14 @@ export const useAuth = () => {
 };
 //Componente proveedor de contexto que envuelve la aplicación y proporciona funciones de autenticación y estado
 export const AuthProvider = ({ children }: any) => {
-  //Estado para almacenar el token y el estado de autenticación
+  //Estado para almacenar los tokens y el estado de autenticación
   const [authState, setAuthState] = useState<{
-    token: string | null;
+    accessToken: string | null;
+    refreshToken: string | null;
     authenticated: boolean | null;
   }>({
-    token: null,
+    accessToken: null,
+    refreshToken: null,
     authenticated: null,
   });
   // Efecto para cargar el token almacenado al montar el componente
@@ -59,22 +67,68 @@ export const AuthProvider = ({ children }: any) => {
         dni,
         password,
       });
-      // Establecer el estado de autenticación y configurar el encabezado de autorización de Axios
+      const access = response.data.access;
+      const refresh = response.data.refresh;
+      console.log("access:", access);
+      console.log("refresh:", refresh);
+      handleAuthentication(access, refresh);
+    } catch (error) {
+      logout();
+    }
+  };
+
+  const handleAuthentication = async (
+    accessToken: string,
+    refrehToken: string
+  ) => {
+    setAuthState({
+      accessToken: accessToken,
+      refreshToken: refrehToken,
+      authenticated: true,
+    });
+
+    axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+
+    if (authState.accessToken) {
+      const shouldRefresh = shouldRefreshToken(authState.accessToken);
+      if (shouldRefresh) {
+        await refreshAccessToken(refrehToken);
+      }
+    }
+
+    // Almacenar el token de acceso de forma segura
+    await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+    await SecureStore.setItemAsync(TOKEN_KEY, refrehToken);
+  };
+
+  const shouldRefreshToken = (token: string) => {
+    const decodedToken = JWT.decode(token, TOKEN_KEY, { timeSkew: 30 });
+    const expiration = new Date(decodedToken.exp * 1000);
+    const now = new Date();
+    const fiveMin = 1000 * 60 * 5;
+    return expiration.getTime() - now.getTime() < fiveMin;
+  };
+
+  const refreshAccessToken = async (refreshToken: string) => {
+    try {
+      const refreshResponse = await axios.post(`${API_URL}accounts/refresh/`, {
+        refreshToken,
+      });
+      const newAccess = refreshResponse.data.access;
+      const newRefresh = refreshResponse.data.refresh;
+
       setAuthState({
-        token: response.data.access,
+        accessToken: newAccess,
+        refreshToken: newRefresh,
         authenticated: true,
       });
 
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer${response.data.access}`;
-      // Almacenar el token de acceso de forma segura
-      await SecureStore.setItemAsync(TOKEN_KEY, response.data.access);
-      return response;
-    } catch (e) {
-      return { error: true, msg: (e as any).response.data.msg };
+      axios.defaults.headers.common["Authorization"] = `Bearer ${newAccess}`;
+    } catch (error) {
+      logout();
     }
   };
+
   // Función para cerrar sesión
   const logout = async () => {
     // Eliminar el token almacenado de forma segura
@@ -83,7 +137,8 @@ export const AuthProvider = ({ children }: any) => {
     axios.defaults.headers.common["Authorization"] = "";
     // Restablecer el estado de autenticación
     setAuthState({
-      token: null,
+      accessToken: null,
+      refreshToken:null,
       authenticated: false,
     });
   };

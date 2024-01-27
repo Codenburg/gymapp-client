@@ -10,7 +10,7 @@ const Stack = createNativeStackNavigator();
 
 export const ScreenRedirection = () => {
   const { authState, onLogout } = useAuth();
-  const token = authState?.token;
+  const token = authState?.accessToken;
   const [decodedToken, setDecodedToken] = useState<JWTBody>();
 
   useEffect(() => {
