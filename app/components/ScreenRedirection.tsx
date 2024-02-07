@@ -6,6 +6,8 @@ import { TOKEN_KEY, useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { JWTBody } from "expo-jwt/dist/types/jwt";
 import { Button } from "react-native";
+import UserManagement from "../screens/UserManagement";
+import CreateUser from "../screens/CreateUser";
 const Stack = createNativeStackNavigator();
 
 export const ScreenRedirection = () => {
@@ -27,19 +29,27 @@ export const ScreenRedirection = () => {
   return (
     <Stack.Navigator>
       {isAdmin ? (
-        <Stack.Screen
-          name="Admin"
-          component={AdminScreen}
-          options={{
-            headerRight: () => <Button onPress={onLogout} title="Sign Out" />,
-          }}
-        ></Stack.Screen>
+        <>
+          <Stack.Screen
+            name="Admin"
+            component={AdminScreen}
+            options={{
+              headerRight: () => (
+                <Button onPress={onLogout} title="Cerrar Sesion" />
+              ),
+            }}
+          />
+          <Stack.Screen name="Panel de usuarios" component={UserManagement} />
+          <Stack.Screen name="Crear usuario" component={CreateUser} />
+        </>
       ) : (
         <Stack.Screen
           name="User"
           component={UserScreen}
           options={{
-            headerRight: () => <Button onPress={onLogout} title="Sign Out" />,
+            headerRight: () => (
+              <Button onPress={onLogout} title="Cerrar Sesion" />
+            ),
           }}
         ></Stack.Screen>
       )}

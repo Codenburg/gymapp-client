@@ -10,7 +10,13 @@ interface AuthProps {
     refreshToken: string | null;
     authenticated: boolean | null;
   };
-  onRegister?: (dni: string, password: string) => Promise<any>;
+  onRegister?: (
+    dni: string,
+    name: string,
+    last_name: string,
+    email: string,
+    password: string
+  ) => Promise<any>;
   onLogin?: (dni: string, password: string) => Promise<any>;
   onLogout?: () => Promise<any>;
 }
@@ -47,19 +53,39 @@ export const AuthProvider = ({ children }: any) => {
       }
     };
     loadToken();
-  }, []);
+  }, []); //cargar aca los tokens y funciones porque aca es donde se carga xd
 
   // Función para realizar el registro de usuario
-  const register = async (dni: string, password: string) => {
+  const register = async (
+    dni: string,
+    name: string,
+    last_name: string,
+    email: string,
+    password: string
+  ) => {
     try {
-      return await axios.post(`${API_URL}accounts/register`, {
+      // Realizar la solicitud HTTP utilizando axios
+      const response = await axios.post(`${API_URL}accounts/register/`, {
         dni,
+        name,
+        last_name,
+        email,
         password,
       });
-    } catch (e) {
-      return { error: true, msg: (e as any).response.data.msg };
+
+      // Devolver los datos de la respuesta si la solicitud es exitosa
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        return { error: error.response.data };
+      } else if (error.request) {
+        return { error: "No se recibió respuesta del servidor." };
+      } else {
+        return { error: error.message };
+      }
     }
   };
+
   // Función para realizar el inicio de sesión
   const login = async (dni: string, password: string) => {
     try {
@@ -103,10 +129,12 @@ export const AuthProvider = ({ children }: any) => {
 
   const shouldRefreshToken = (token: string) => {
     const decodedToken = JWT.decode(token, TOKEN_KEY, { timeSkew: 30 });
-    const expiration = new Date(decodedToken.exp * 1000);
-    const now = new Date();
-    const fiveMin = 1000 * 60 * 5;
-    return expiration.getTime() - now.getTime() < fiveMin;
+    if (typeof decodedToken.exp === "number") {
+      const expiration = new Date(decodedToken.exp);
+      const now = new Date();
+      const fiveMin = 1000 * 60 * 5;
+      return expiration.getMinutes() - now.getTime() < fiveMin;
+    }
   };
 
   const refreshAccessToken = async (refreshToken: string) => {
@@ -138,7 +166,7 @@ export const AuthProvider = ({ children }: any) => {
     // Restablecer el estado de autenticación
     setAuthState({
       accessToken: null,
-      refreshToken:null,
+      refreshToken: null,
       authenticated: false,
     });
   };
