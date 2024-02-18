@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }: any) => {
           const shouldRefresh = shouldRefreshToken(access);
           if (shouldRefresh) {
             await SecureStore.deleteItemAsync("access");
+            await SecureStore.deleteItemAsync("refresh");
             await refreshAccessToken(refresh);
           }
           instance.defaults.headers.common[
@@ -103,8 +104,8 @@ export const AuthProvider = ({ children }: any) => {
       });
       const access = response.data.access;
       const refresh = response.data.refresh;
-      console.log('access: ',access)
-      console.log('refresh: ',refresh)
+      console.log("access: ", access);
+      console.log("refresh: ", refresh);
       handleAuthentication(access, refresh);
     } catch (error) {
       logout();
@@ -137,11 +138,13 @@ export const AuthProvider = ({ children }: any) => {
 
   const refreshAccessToken = async (refreshToken: string | null) => {
     try {
-      const refreshResponse = await instance.post("accounts/refresh/", {
+      const response = await instance.post("accounts/refresh/", {
         refresh: refreshToken,
       });
-      const newAccess = refreshResponse.data.access;
-      return await SecureStore.setItemAsync("access", newAccess);
+      const newAccess = response.data.access;
+      const newRefresh = response.data.refresh;
+      await SecureStore.setItemAsync("access", newAccess);
+      await SecureStore.setItemAsync("refresh", newRefresh);
     } catch (error) {
       logout();
     }
