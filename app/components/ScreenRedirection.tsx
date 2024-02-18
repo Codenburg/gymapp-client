@@ -2,12 +2,13 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { UserScreen } from "../screens/UserScreen";
 import AdminScreen from "../screens/AdminScreen";
 import JWT from "expo-jwt";
-import { TOKEN_KEY, useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { JWTBody } from "expo-jwt/dist/types/jwt";
 import { Button } from "react-native";
 import UserManagement from "../screens/UserManagement";
 import CreateUser from "../screens/CreateUser";
+import { TOKEN_KEY } from "../../utils/constants/Keys";
 const Stack = createNativeStackNavigator();
 
 export const ScreenRedirection = () => {
