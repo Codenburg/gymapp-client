@@ -21,7 +21,7 @@ const CreateUser = ({ navigation }: { navigation: any }) => {
         password
       );
       if (result && result.error) {
-        return alert("Datos incorrectos"); //AGREGAR VALIDACION DE FORMULARIO (YUP)
+        return alert("Datos incorrectos");
       } else if (result) {
         alert("Usuario creado con exito!");
         navigation.navigate("Panel de usuarios");
@@ -30,6 +30,7 @@ const CreateUser = ({ navigation }: { navigation: any }) => {
       alert("Error de red. Por favor, inténtalo de nuevo más tarde.");
     }
   };
+  const inputStyle = tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`;
   return (
     <SafeAreaView
       style={tw`flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8`}
@@ -42,32 +43,32 @@ const CreateUser = ({ navigation }: { navigation: any }) => {
         </Text>
         <View style={tw`mt-10 sm:mx-auto sm:w-full sm:max-w-sm`}>
           <TextInput
-            style={tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`}
+            style={inputStyle}
             placeholder="DNI"
             value={dni}
             onChangeText={(number: string) => setDni(number)}
             keyboardType="numeric"
           />
           <TextInput
-            style={tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`}
+            style={inputStyle}
             placeholder="Nombre"
             value={userName}
             onChangeText={(userName: string) => setUserName(userName)}
           />
           <TextInput
-            style={tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`}
+            style={inputStyle}
             placeholder="Apellido"
             value={lastName}
             onChangeText={(lastName: string) => setLastName(lastName)}
           />
           <TextInput
-            style={tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`}
+            style={inputStyle}
             placeholder="Email"
             value={email}
             onChangeText={(email: string) => setEmail(email)}
           />
           <TextInput
-            style={tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`}
+            style={inputStyle}
             placeholder="Contraseña"
             onChangeText={(pass: string) => setPassword(pass)}
             secureTextEntry={true}

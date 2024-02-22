@@ -34,8 +34,6 @@ export const AuthProvider = ({ children }: any) => {
       try {
         const access = await SecureStore.getItemAsync("access");
         const refresh = await SecureStore.getItemAsync("refresh");
-        console.log("stored access: ", access);
-        console.log("stored refresh: ", refresh);
         if (access) {
           const shouldRefresh = shouldRefreshToken(access);
           if (shouldRefresh) {
@@ -104,8 +102,6 @@ export const AuthProvider = ({ children }: any) => {
       });
       const access = response.data.access;
       const refresh = response.data.refresh;
-      console.log("access: ", access);
-      console.log("refresh: ", refresh);
       handleAuthentication(access, refresh);
     } catch (error) {
       logout();
