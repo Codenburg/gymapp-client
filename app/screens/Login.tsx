@@ -1,5 +1,4 @@
 import { View, Text, TextInput, Button } from "react-native";
-import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import * as yup from "yup";
 import { Formik } from "formik";
@@ -9,7 +8,7 @@ const Login = () => {
   const { onLogin } = useAuth();
 
   const loginSchema = yup.object().shape({
-    dni: yup.string().required("El DNI es obligatorio"),
+    dni: yup.number().required("El DNI es obligatorio"),
     password: yup
       .string()
       .min(7, "La contraseña debe ser entre 7 y 8 caracteres")
@@ -69,7 +68,7 @@ const Login = () => {
                 />
                 {errors.password && <Text>{errors.password}</Text>}
                 <Button
-                  onPress={handleSubmit}
+                  onPress={()=> handleSubmit}
                   title="Ingresar"
                   disabled={!isValid}
                 />
