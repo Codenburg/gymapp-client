@@ -9,14 +9,7 @@ const Login = () => {
   const { onLogin } = useAuth();
 
   const login = async () => {
-    try {
-      const result = await onLogin!(dni, password);
-      if (result && result.error) {
-        return alert("Datos incorrectos");
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    await onLogin!(dni, password);
   };
 
   return (

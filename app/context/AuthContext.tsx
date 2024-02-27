@@ -28,43 +28,53 @@ export const AuthProvider = ({ children }: any) => {
     refreshToken: null,
     authenticated: null,
   });
-  // Efecto para cargar el token almacenado al montar el componente
+  // Cargar el token almacenado al montar el componente
   useEffect(() => {
     const loadToken = async () => {
       try {
-        const access = await SecureStore.getItemAsync("access");
-        const refresh = await SecureStore.getItemAsync("refresh");
-        console.log("stored access: ", access);
-        console.log("stored refresh: ", refresh);
-        if (access) {
+        const [access, refresh] = await Promise.all([
+          SecureStore.getItemAsync("access"),
+          SecureStore.getItemAsync("refresh"),
+        ]);
+        if (access && refresh) {
           const shouldRefresh = shouldRefreshToken(access);
           if (shouldRefresh) {
-            await SecureStore.deleteItemAsync("access");
-            await SecureStore.deleteItemAsync("refresh");
             await refreshAccessToken(refresh);
+
+            const [newAccess, newRefresh] = await Promise.all([
+              SecureStore.getItemAsync("access"),
+              SecureStore.getItemAsync("refresh"),
+            ]);
+
+            if (newAccess && newRefresh) {
+              instance.defaults.headers.common[
+                "Authorization"
+              ] = `Bearer ${newAccess}`;
+              setAuthState({
+                accessToken: newAccess,
+                refreshToken: newRefresh,
+                authenticated: true,
+              });
+            }
+          } else {
+            instance.defaults.headers.common[
+              "Authorization"
+            ] = `Bearer ${access}`;
+            setAuthState({
+              accessToken: access,
+              refreshToken: refresh,
+              authenticated: true,
+            });
           }
-          instance.defaults.headers.common[
-            "Authorization"
-          ] = `Bearer ${access}`;
-          setAuthState({
-            accessToken: access,
-            refreshToken: refresh,
-            authenticated: true,
-          });
         }
-        setTimeout(async () => {
-          await refreshAccessToken(refresh);
-        }, 300000);
       } catch (error) {
-        console.error("Error al cargar el token:", error);
+        console.error("Error al cargar el token:", error.response?.data);
         logout();
       }
     };
     loadToken();
   }, []);
-  //cargar aca los tokens y funciones porque aca es donde se carga xd
 
-  // Función para realizar el registro de usuarior
   const register = async (
     dni: string,
     name: string,
@@ -95,7 +105,6 @@ export const AuthProvider = ({ children }: any) => {
     }
   };
 
-  // Función para realizar el inicio de sesión
   const login = async (dni: string, password: string) => {
     try {
       const response = await instance.post("accounts/login/", {
@@ -104,10 +113,9 @@ export const AuthProvider = ({ children }: any) => {
       });
       const access = response.data.access;
       const refresh = response.data.refresh;
-      console.log("access: ", access);
-      console.log("refresh: ", refresh);
       handleAuthentication(access, refresh);
     } catch (error) {
+      alert(error.response.data.detail);
       logout();
     }
   };
@@ -132,7 +140,7 @@ export const AuthProvider = ({ children }: any) => {
       const expiration = new Date(decodedToken.exp * 1000);
       const now = new Date().getTime();
       const timeRemaining = expiration.getTime() - now;
-      return timeRemaining < 1000 * 60 * 5; // Devuelve true si quedan menos de 5 minutos
+      return timeRemaining < 1000 * 60 * 6; // Devuelve true si quedan menos de 6 minutos
     }
   };
 
@@ -141,12 +149,14 @@ export const AuthProvider = ({ children }: any) => {
       const response = await instance.post("accounts/refresh/", {
         refresh: refreshToken,
       });
-      const newAccess = response.data.access;
-      const newRefresh = response.data.refresh;
-      await SecureStore.setItemAsync("access", newAccess);
-      await SecureStore.setItemAsync("refresh", newRefresh);
+      await Promise.all([
+        SecureStore.deleteItemAsync("access"),
+        SecureStore.setItemAsync("access", response.data.access),
+      ]);
     } catch (error) {
       logout();
+      console.log("error al refrescar el token:", error);
+      //error al refrescar el token: [Error: Invalid value provided to SecureStore. Values must be strings; consider JSON-encoding your values if they are serializable.]
     }
   };
 

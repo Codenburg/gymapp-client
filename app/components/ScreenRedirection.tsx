@@ -1,14 +1,15 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { UserScreen } from "../screens/UserScreen";
-import AdminScreen from "../screens/AdminScreen";
+import AdminScreen from "../screens/admin/AdminScreen";
 import JWT from "expo-jwt";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import { JWTBody } from "expo-jwt/dist/types/jwt";
 import { Button } from "react-native";
-import UserManagement from "../screens/UserManagement";
-import CreateUser from "../screens/CreateUser";
+import ManagmenteUsers from "../screens/admin/ManagmentUsers";
+import CreateUser from "../screens/admin/CreateUser";
 import { TOKEN_KEY } from "../../utils/constants/Keys";
+import ListUsers from "../screens/admin/ListUsers";
 const Stack = createNativeStackNavigator();
 
 export const ScreenRedirection = () => {
@@ -40,8 +41,9 @@ export const ScreenRedirection = () => {
               ),
             }}
           />
-          <Stack.Screen name="Panel de usuarios" component={UserManagement} />
+          <Stack.Screen name="Panel de usuarios" component={ManagmenteUsers} />
           <Stack.Screen name="Crear usuario" component={CreateUser} />
+          <Stack.Screen name="Ver Usuarios" component={ListUsers} />
         </>
       ) : (
         <Stack.Screen
