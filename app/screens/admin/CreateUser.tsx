@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, SafeAreaView, Text, TextInput, View } from "react-native";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import tw from "twrnc";
 
 const CreateUser = ({ navigation }: { navigation: any }) => {
