@@ -1,4 +1,5 @@
-export interface UserRegister {
+export interface User {
+  readonly id: number | null
   dni: number | null;
   passwrod: string | null;
   name: string | null;

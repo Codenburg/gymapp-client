@@ -3,11 +3,9 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import JWT from "expo-jwt";
 import { AuthProps } from "../../utils/interfaces/AuthProps";
-import { TOKEN_KEY, baseURL } from "../../utils/constants/Keys";
-
-const instance = axios.create({
-  baseURL,
-});
+import { TOKEN_KEY } from "../../utils/constants/Keys";
+import { instance } from "../../utils/constants/AxiosIntance";
+import { useFocusEffect } from "@react-navigation/native";
 
 //Contexto con la interfaz definida
 const AuthContext = createContext<AuthProps>({});
@@ -31,11 +29,11 @@ export const AuthProvider = ({ children }: any) => {
   // Cargar el token almacenado al montar el componente
   useEffect(() => {
     const loadToken = async () => {
+      const [access, refresh] = await Promise.all([
+        SecureStore.getItemAsync("access"),
+        SecureStore.getItemAsync("refresh"),
+      ]);
       try {
-        const [access, refresh] = await Promise.all([
-          SecureStore.getItemAsync("access"),
-          SecureStore.getItemAsync("refresh"),
-        ]);
         if (access && refresh) {
           const shouldRefresh = shouldRefreshToken(access);
           if (shouldRefresh) {
@@ -72,7 +70,22 @@ export const AuthProvider = ({ children }: any) => {
         logout();
       }
     };
-    loadToken();
+
+    const checkTokenExpiration = async () => {
+      const access = await SecureStore.getItemAsync("access");
+      if (access) {
+        const shouldRefresh = shouldRefreshToken(access);
+        if (shouldRefresh) {
+          await loadToken();
+        }
+      }
+    };
+    checkTokenExpiration();
+    const intervalId = setInterval(() => {
+      checkTokenExpiration();
+    }, 60000); // Verificar cada minuto
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const register = async (
@@ -115,7 +128,6 @@ export const AuthProvider = ({ children }: any) => {
       const refresh = response.data.refresh;
       handleAuthentication(access, refresh);
     } catch (error) {
-      alert(error.response.data.detail);
       logout();
     }
   };
@@ -140,8 +152,9 @@ export const AuthProvider = ({ children }: any) => {
       const expiration = new Date(decodedToken.exp * 1000);
       const now = new Date().getTime();
       const timeRemaining = expiration.getTime() - now;
-      return timeRemaining < 1000 * 60 * 6; // Devuelve true si quedan menos de 6 minutos
+      return timeRemaining < 1000 * 60 * 1;
     }
+    return false;
   };
 
   const refreshAccessToken = async (refreshToken: string | null) => {
@@ -149,6 +162,7 @@ export const AuthProvider = ({ children }: any) => {
       const response = await instance.post("accounts/refresh/", {
         refresh: refreshToken,
       });
+      console.log("refresh token", refreshToken);
       await Promise.all([
         SecureStore.deleteItemAsync("access"),
         SecureStore.setItemAsync("access", response.data.access),

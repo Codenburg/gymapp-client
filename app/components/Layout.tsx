@@ -1,5 +1,5 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Button } from "react-native";
 import Login from "../screens/Login";
