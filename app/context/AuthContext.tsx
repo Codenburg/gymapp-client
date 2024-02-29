@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: any) => {
         logout();
       }
     };
-
+    loadToken();
     const checkTokenExpiration = async () => {
       const access = await SecureStore.getItemAsync("access");
       if (access) {
@@ -80,7 +80,6 @@ export const AuthProvider = ({ children }: any) => {
         }
       }
     };
-    checkTokenExpiration();
     const intervalId = setInterval(() => {
       checkTokenExpiration();
     }, 60000); // Verificar cada minuto
@@ -128,6 +127,7 @@ export const AuthProvider = ({ children }: any) => {
       const refresh = response.data.refresh;
       handleAuthentication(access, refresh);
     } catch (error) {
+      alert(error.response.data.detail);
       logout();
     }
   };

@@ -10,6 +10,7 @@ import ManagmenteUsers from "../screens/admin/ManagmentUsers";
 import CreateUser from "../screens/admin/CreateUser";
 import { TOKEN_KEY } from "../../utils/constants/Keys";
 import ListUsers from "../screens/admin/ListUsers";
+import DetailUser from "../screens/admin/DetailUser";
 const Stack = createNativeStackNavigator();
 
 export const ScreenRedirection = () => {
@@ -44,6 +45,7 @@ export const ScreenRedirection = () => {
           <Stack.Screen name="Panel de usuarios" component={ManagmenteUsers} />
           <Stack.Screen name="Crear usuario" component={CreateUser} />
           <Stack.Screen name="Ver Usuarios" component={ListUsers} />
+          <Stack.Screen name="Detalles del usuario" component={DetailUser} initialParams={{ id: null }} />
         </>
       ) : (
         <Stack.Screen
