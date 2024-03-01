@@ -5,7 +5,6 @@ import JWT from "expo-jwt";
 import { AuthProps } from "../../utils/interfaces/AuthProps";
 import { TOKEN_KEY } from "../../utils/constants/Keys";
 import { instance } from "../../utils/constants/AxiosIntance";
-import { useFocusEffect } from "@react-navigation/native";
 
 //Contexto con la interfaz definida
 const AuthContext = createContext<AuthProps>({});
@@ -27,50 +26,52 @@ export const AuthProvider = ({ children }: any) => {
     authenticated: null,
   });
   // Cargar el token almacenado al montar el componente
-  useEffect(() => {
-    const loadToken = async () => {
-      const [access, refresh] = await Promise.all([
-        SecureStore.getItemAsync("access"),
-        SecureStore.getItemAsync("refresh"),
-      ]);
-      try {
-        if (access && refresh) {
-          const shouldRefresh = shouldRefreshToken(access);
-          if (shouldRefresh) {
-            await refreshAccessToken(refresh);
+  const loadToken = async () => {
+    const [access, refresh] = await Promise.all([
+      SecureStore.getItemAsync("access"),
+      SecureStore.getItemAsync("refresh"),
+    ]);
+    console.log("access stored:", access);
+    console.log("refresh stored", refresh);
+    try {
+      if (access && refresh) {
+        const shouldRefresh = shouldRefreshToken(access);
+        if (shouldRefresh) {
+          await refreshAccessToken(refresh);
 
-            const [newAccess, newRefresh] = await Promise.all([
-              SecureStore.getItemAsync("access"),
-              SecureStore.getItemAsync("refresh"),
-            ]);
+          const [newAccess, newRefresh] = await Promise.all([
+            SecureStore.getItemAsync("access"),
+            SecureStore.getItemAsync("refresh"),
+          ]);
 
-            if (newAccess && newRefresh) {
-              instance.defaults.headers.common[
-                "Authorization"
-              ] = `Bearer ${newAccess}`;
-              setAuthState({
-                accessToken: newAccess,
-                refreshToken: newRefresh,
-                authenticated: true,
-              });
-            }
-          } else {
+          if (newAccess && newRefresh) {
             instance.defaults.headers.common[
               "Authorization"
-            ] = `Bearer ${access}`;
+            ] = `Bearer ${newAccess}`;
             setAuthState({
-              accessToken: access,
-              refreshToken: refresh,
+              accessToken: newAccess,
+              refreshToken: newRefresh,
               authenticated: true,
             });
           }
+        } else {
+          instance.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${access}`;
+          setAuthState({
+            accessToken: access,
+            refreshToken: refresh,
+            authenticated: true,
+          });
         }
-      } catch (error) {
-        console.error("Error al cargar el token:", error.response?.data);
-        logout();
       }
-    };
-    loadToken();
+    } catch (error) {
+      console.error("Error al cargar el token:", error.response?.data);
+      logout();
+    }
+  };
+
+  useEffect(() => {
     const checkTokenExpiration = async () => {
       const access = await SecureStore.getItemAsync("access");
       if (access) {
@@ -85,7 +86,14 @@ export const AuthProvider = ({ children }: any) => {
     }, 60000); // Verificar cada minuto
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [setAuthState]);
+
+  useEffect(() => {
+    const loadInitialToken = async () => {
+      await loadToken(); // Cargar los tokens al inicio
+    };
+    loadInitialToken();
+  }, [setAuthState]);
 
   const register = async (
     dni: string,
@@ -138,13 +146,13 @@ export const AuthProvider = ({ children }: any) => {
       refreshToken: refresh,
       authenticated: true,
     });
-
-    axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
-
-    // Almacenar el token de acceso de forma segura
     await SecureStore.setItemAsync("access", access);
     await SecureStore.setItemAsync("refresh", refresh);
+    axios.defaults.headers.common["Authorization"] = `Bearer ${access}`;
+    await loadToken();
   };
+
+  // Almacenar el token de acceso de forma segura
 
   const shouldRefreshToken = (token: string) => {
     const decodedToken = JWT.decode(token, TOKEN_KEY, { timeSkew: 30 });
@@ -162,7 +170,6 @@ export const AuthProvider = ({ children }: any) => {
       const response = await instance.post("accounts/refresh/", {
         refresh: refreshToken,
       });
-      console.log("refresh token", refreshToken);
       await Promise.all([
         SecureStore.deleteItemAsync("access"),
         SecureStore.setItemAsync("access", response.data.access),
