@@ -10,7 +10,7 @@ import { instance } from "../../../utils/constants/AxiosIntance";
 import { useEffect, useState } from "react";
 import { User } from "../../../utils/interfaces/User";
 import tw from "twrnc";
-import Icon from "react-native-vector-icons/FontAwesome";
+import { Feather } from "@expo/vector-icons";
 
 const ListUsers = ({ navigation }: { navigation: any }) => {
   const [originalUsers, setOriginalUsers] = useState<User[]>([]);
@@ -52,12 +52,19 @@ const ListUsers = ({ navigation }: { navigation: any }) => {
   if (!filteredUsers) {
     return <Text>Cargando...</Text>;
   }
-
   return (
     <SafeAreaView style={tw`mb-4`}>
-      <View style={tw`relative`}>
+      <View
+        style={tw`relative bg-white rounded-lg border-2 border-gray-300 p-2 pl-8 mb-2`}
+      >
+        <Feather
+          name="search"
+          size={20}
+          color="#A0AEC0"
+          style={tw`absolute top-3 left-4`}
+        />
         <TextInput
-          style={tw`border-2 border-gray-300 rounded-lg p-2 pl-8`}
+          style={tw`text-lg ml-3`}
           placeholder="Buscar por DNI..."
           value={search}
           keyboardType="numeric"
@@ -68,7 +75,7 @@ const ListUsers = ({ navigation }: { navigation: any }) => {
             onPress={handleClearSearch}
             style={tw`absolute top-2 right-2`}
           >
-            <Icon name="close" size={30} />
+            <Feather name="x" size={28} color="#A0AEC0" />
           </TouchableOpacity>
         ) : null}
       </View>

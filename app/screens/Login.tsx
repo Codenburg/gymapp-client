@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Button } from "react-native";
+import { View, Text, TextInput, Button, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import tw from "twrnc";
@@ -13,30 +13,31 @@ const Login = () => {
   };
 
   return (
-    <View
-      style={tw`flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8`}
-    >
+    <View style={tw`flex-1 justify-center px-6 py-12 lg:px-8 bg-white`}>
       <View style={tw`sm:mx-auto sm:w-full sm:max-w-sm`}>
-        <Text
-          style={tw`mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900`}
-        >
-          Iniciar Sesion
+        <Text style={tw`text-center text-3xl font-bold text-gray-900 mb-8`}>
+          Iniciar Sesión
         </Text>
-        <View style={tw`mt-10 sm:mx-auto sm:w-full sm:max-w-sm`}>
+        <View>
           <TextInput
-            style={tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`}
+            style={tw`border border-gray-300 rounded-md mb-4 px-4 py-3 text-lg text-gray-900`}
             placeholder="DNI"
             onChangeText={(number: string) => setDni(number)}
             value={dni}
             keyboardType="numeric"
           />
           <TextInput
-            style={tw`border border-opacity-75 rounded-md mb-2 p-1.5 py-1.5 text-sm font-medium text-gray-900`}
+            style={tw`border border-gray-300 rounded-md mb-4 px-4 py-3 text-lg text-gray-900`}
             placeholder="Contraseña"
             onChangeText={(pass: string) => setPassword(pass)}
             secureTextEntry={true}
           />
-          <Button onPress={login} title="Ingresar" />
+          <TouchableOpacity
+            onPress={login}
+            style={tw`shadow bg-blue-500 py-2 px-4 rounded items-center mt-2`}
+          >
+            <Text style={tw`text-center text-white text-lg`}>Ingresar</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

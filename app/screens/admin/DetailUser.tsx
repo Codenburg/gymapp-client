@@ -2,7 +2,7 @@ import { View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
 import { User } from "../../../utils/interfaces/User";
 import { instance } from "../../../utils/constants/AxiosIntance";
-
+import tw from "twrnc";
 const DetailUser = ({ route }: { route: any }) => {
   const [user, setUser] = useState<User>();
   const { id } = route.params;
@@ -16,18 +16,18 @@ const DetailUser = ({ route }: { route: any }) => {
 
   if (!user) {
     return (
-      <>
-        <Text>Cargando...</Text>
-      </>
+      <View style={tw`flex-1 items-center justify-center`}>
+        <Text style={tw`text-lg`}>Cargando...</Text>
+      </View>
     );
   }
   return (
-    <View>
-      <Text>
-        Nombre y Apellido{user.name} {user.last_name}
+    <View style={tw`bg-white rounded-lg shadow-md p-4`}>
+      <Text style={tw`text-lg font-bold mb-2`}>
+        {user.name} {user.last_name}
       </Text>
-      <Text>DNI {user.dni}</Text>
-      <Text>Email: {user.email}</Text>
+      <Text style={tw`text-gray-600`}>DNI: {user.dni}</Text>
+      <Text style={tw`text-gray-600`}>Email: {user.email}</Text>
     </View>
   );
 };
