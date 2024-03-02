@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: any) => {
         }
       }
     } catch (error) {
-      console.error("Error al cargar el token:", error.response?.data);
+      alert("Sesion Expirada");
       logout();
     }
   };
