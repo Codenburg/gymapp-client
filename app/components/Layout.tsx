@@ -1,9 +1,9 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { AuthProvider, useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Button } from "react-native";
 import Login from "../screens/Login";
-import { ScreenRedirection } from "../components/ScreenRedirection";
+import { AppNavigator } from "./AppNavigator";
 
 const Stack = createNativeStackNavigator();
 
@@ -16,7 +16,7 @@ export const Layout = () => {
         {authState?.authenticated ? (
           <Stack.Screen
             name="Gymapp"
-            component={ScreenRedirection}
+            component={AppNavigator}
             options={{
               headerShown: false,
               headerRight: () => <Button onPress={onLogout} title="Sign Out" />,
