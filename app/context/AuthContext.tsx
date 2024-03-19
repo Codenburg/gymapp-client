@@ -3,9 +3,9 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import JWT from "expo-jwt";
 import { AuthProps } from "../../utils/interfaces/AuthProps";
-import { TOKEN_KEY } from "../../utils/constants/Keys";
 import { instance } from "../../utils/constants/AxiosIntance";
 import { Alert } from "react-native";
+export const TOKEN_KEY = process.env.EXPO_PUBLIC_TOKEN_KEY;
 
 //Contexto con la interfaz definida
 const AuthContext = createContext<AuthProps>({});
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }: any) => {
         }
       }
     } catch (error) {
-      alert("Sesion Expirada");
+      Alert.alert("Sesion Expirada");
       logout();
     }
   };
@@ -126,8 +126,11 @@ export const AuthProvider = ({ children }: any) => {
         if (data.password)
           errorMessage.push(`Contraseña: ${data.password.join(", ")}`);
 
-        Alert.alert('Error en los siguientes campos',`\n${errorMessage.join("\n")}`);
-      } 
+        Alert.alert(
+          "Error en los siguientes campos",
+          `\n${errorMessage.join("\n")}`
+        );
+      }
     }
   };
 
@@ -141,7 +144,7 @@ export const AuthProvider = ({ children }: any) => {
       const refresh = response.data.refresh;
       handleAuthentication(access, refresh);
     } catch (error) {
-      alert(error.response.data.detail);
+      Alert.alert('Error al Iniciar Sesion',error.response.data.detail);
       logout();
     }
   };
