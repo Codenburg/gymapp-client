@@ -7,11 +7,10 @@ const DeleteUser = ({ id, navigation }: { id: any; navigation: any }) => {
   const handleUserDelete = async () => {
     try {
       await instance.delete(`accounts/delete/${id}/`);
-      alert("Usuario eliminado con éxito");
+      Alert.alert("Usuario eliminado con éxito");
       navigation.navigate("Panel de usuarios");
     } catch (error) {
-      alert("Hubo un error al eliminar el usuario");
-      console.error("Error al eliminar usuario:", error);
+      Alert.alert("Error al eliminar", "Intente de nuevo en un momento");
     }
   };
   return (
