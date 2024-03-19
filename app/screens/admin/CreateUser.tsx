@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Button,
   SafeAreaView,
   Text,
@@ -27,14 +28,12 @@ const CreateUser = ({ navigation }: { navigation: any }) => {
         email,
         password
       );
-      if (response && response.error) {
-        return alert("Datos incorrectos");
-      } else if (response) {
-        alert("Usuario creado con exito!");
+      if (response) {
+        Alert.alert("Usuario creado con exito!");
         navigation.navigate("Panel de usuarios");
       }
     } catch (error) {
-      alert("Error de red. Por favor, inténtalo de nuevo más tarde.");
+      Alert.alert("Error de red. Por favor, inténtalo de nuevo más tarde.");
     }
   };
   const inputStyle = tw`border border-gray-300 rounded-lg mb-4 px-4 py-3 text-lg text-gray-900`;

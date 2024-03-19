@@ -3,8 +3,9 @@ import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 import JWT from "expo-jwt";
 import { AuthProps } from "../../utils/interfaces/AuthProps";
-import { TOKEN_KEY } from "../../utils/constants/Keys";
 import { instance } from "../../utils/constants/AxiosIntance";
+import { Alert } from "react-native";
+export const TOKEN_KEY = process.env.EXPO_PUBLIC_TOKEN_KEY;
 
 //Contexto con la interfaz definida
 const AuthContext = createContext<AuthProps>({});
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }: any) => {
         }
       }
     } catch (error) {
-      alert("Sesion Expirada");
+      Alert.alert("Sesion Expirada");
       logout();
     }
   };
@@ -111,16 +112,24 @@ export const AuthProvider = ({ children }: any) => {
         email,
         password,
       });
-
-      // Devolver los datos de la respuesta si la solicitud es exitosa
       return response.data;
     } catch (error) {
-      if (error.response) {
-        return { error: error.response.data };
-      } else if (error.request) {
-        return { error: "No se recibió respuesta del servidor." };
-      } else {
-        return { error: error.message };
+      if (error.response && error.response.data) {
+        const { data } = error.response;
+        const errorMessage = [];
+
+        if (data.dni) errorMessage.push(`DNI: ${data.dni.join(", ")}`);
+        if (data.name) errorMessage.push(`Nombre: ${data.name.join(", ")}`);
+        if (data.last_name)
+          errorMessage.push(`Apellido: ${data.last_name.join(", ")}`);
+        if (data.email) errorMessage.push(`Email: ${data.email.join(", ")}`);
+        if (data.password)
+          errorMessage.push(`Contraseña: ${data.password.join(", ")}`);
+
+        Alert.alert(
+          "Error en los siguientes campos",
+          `\n${errorMessage.join("\n")}`
+        );
       }
     }
   };
@@ -135,7 +144,7 @@ export const AuthProvider = ({ children }: any) => {
       const refresh = response.data.refresh;
       handleAuthentication(access, refresh);
     } catch (error) {
-      alert(error.response.data.detail);
+      Alert.alert('Error al Iniciar Sesion',error.response.data.detail);
       logout();
     }
   };

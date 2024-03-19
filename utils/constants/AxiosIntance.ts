@@ -1,6 +1,5 @@
 import axios from "axios";
-import { baseURL } from "./Keys";
-
+const baseURL = process.env.EXPO_PUBLIC_API_URL
 export const instance = axios.create({
     baseURL,
   });
