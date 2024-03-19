@@ -27,9 +27,7 @@ const CreateUser = ({ navigation }: { navigation: any }) => {
         email,
         password
       );
-      if (response && response.error) {
-        return alert("Datos incorrectos");
-      } else if (response) {
+      if (response) {
         alert("Usuario creado con exito!");
         navigation.navigate("Panel de usuarios");
       }
